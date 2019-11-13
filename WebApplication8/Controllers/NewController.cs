@@ -12,8 +12,8 @@ namespace WebApplication8.Controllers
 
         public IActionResult About() 
         {
-
-            return this.RedirectTo<DefaultController>(x => x.Index());
+            var id = 5;
+            return this.RedirectTo<DefaultController>(x => x.Index(id,"my test"));
 
            // return RedirectToAction("Index", "Default");
         }

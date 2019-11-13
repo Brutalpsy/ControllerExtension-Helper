@@ -9,10 +9,10 @@ namespace WebApplication8.Controllers
 {
     public class DefaultController : Controller
     {
-        // GET: Default
-        public ActionResult Index()
+        [ActionName("nesto")]
+        public ActionResult Index(int id, string nesto)
         {
-            return View();
+            return View(nameof(Index));
         }
 
         // GET: Default/Details/5
