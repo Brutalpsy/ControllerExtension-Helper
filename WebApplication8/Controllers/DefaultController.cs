@@ -9,7 +9,7 @@ namespace WebApplication8.Controllers
 {
     public class DefaultController : Controller
     {
-        [ActionName("nesto")]
+        [ActionName("something")]
         public ActionResult Index(int id, string nesto)
         {
             return View(nameof(Index));

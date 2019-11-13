@@ -12,17 +12,14 @@ namespace WebApplication8.Infrastructure
         private static readonly ConcurrentDictionary<string, string> _cache = new ConcurrentDictionary<string, string>();
         public static IActionResult RedirectTo<TController>(this Controller controller, Expression<Action<TController>> redurectExpression)
         {
-            if (redurectExpression.Body.NodeType != ExpressionType.Call) 
+            if (redurectExpression.Body.NodeType != ExpressionType.Call)
             {
                 throw new InvalidOperationException($"the provided expression is not a valid method call: {redurectExpression.Body}");
             }
 
             var methodCallExpression = (MethodCallExpression)redurectExpression.Body;
-
             var actionName = GetActionName(methodCallExpression);
-           
-            var controllerName = typeof(TController).Name.Replace(nameof(Controller),string.Empty);
-
+            var controllerName = typeof(TController).Name.Replace(nameof(Controller), string.Empty);
             var routeValues = ExtractRouteValues(methodCallExpression);
 
             return controller.RedirectToAction(actionName, controllerName);
@@ -30,9 +27,9 @@ namespace WebApplication8.Infrastructure
 
         private static string GetActionName(MethodCallExpression methodCallExpression)
         {
-            var cacheley = $"{methodCallExpression.Method.Name}_{methodCallExpression.Object.Type.Name}";
-           
-            return _cache.GetOrAdd(cacheley, _ =>
+            var cacheKey = $"{methodCallExpression.Method.Name}_{methodCallExpression.Object.Type.Name}";
+
+            return _cache.GetOrAdd(cacheKey, _ =>
             {
                 var methodName = methodCallExpression.Method.Name;
 
@@ -45,34 +42,33 @@ namespace WebApplication8.Infrastructure
 
                 return actionName ?? methodName;
             });
-                
-       
+
+
         }
 
-        private static RouteValueDictionary ExtractRouteValues(MethodCallExpression expression) 
+        private static RouteValueDictionary ExtractRouteValues(MethodCallExpression expression)
         {
             var names = expression.Method.GetParameters().Select(x => x.Name).ToArray();
-
-            var values = expression.Arguments.Select(x =>
+            var values = expression.Arguments.Select(arg =>
             {
-                if (x.NodeType == ExpressionType.Constant) 
+                if (arg.NodeType == ExpressionType.Constant)
                 {
-                    var constantExp = (ConstantExpression)x;
-                    return constantExp.Value;
+                    var constantExpression = (ConstantExpression)arg;
+                    return constantExpression.Value;
                 }
 
-                var expressionConvert = Expression.Convert(x, typeof(object));
-                var funcExp = Expression.Lambda<Func<object>>(expressionConvert);
+                var expressionConvert = Expression.Convert(arg, typeof(object));
+                var funcExpression = Expression.Lambda<Func<object>>(expressionConvert);
 
-                return funcExp.Compile()();
+                return funcExpression.Compile()();
             }).ToArray();
-            var routeValueDict = new RouteValueDictionary();
+            var routeValueDictionary = new RouteValueDictionary();
 
             for (int i = 0; i < names.Length; i++)
             {
-                routeValueDict.Add(names[i], values[i]);
+                routeValueDictionary.Add(names[i], values[i]);
             }
-            return routeValueDict;
+            return routeValueDictionary;
         }
     }
 }
